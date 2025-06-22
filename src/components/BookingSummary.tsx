@@ -3,13 +3,16 @@ import { IndianRupee } from 'lucide-react';
 
 interface BookingSummaryProps {
   venue: any;
+  selectedAddOns?: any[];
+  decorationFee?: number;
 }
 
-const BookingSummary = ({ venue }: BookingSummaryProps) => {
+const BookingSummary = ({ venue, selectedAddOns = [], decorationFee = 0 }: BookingSummaryProps) => {
   const basePrice = venue.price;
-  const decorationFee = 0; // This would be calculated based on form data
+  const addOnsTotal = selectedAddOns.reduce((total, addon) => total + addon.price, 0);
+  const totalDecorationFee = decorationFee;
   const advanceAmount = 700;
-  const balanceAmount = basePrice + decorationFee - advanceAmount;
+  const balanceAmount = basePrice + addOnsTotal + totalDecorationFee - advanceAmount;
 
   return (
     <div className="bg-gray-800 rounded-xl p-4 md:p-6 sticky top-6">
@@ -22,11 +25,20 @@ const BookingSummary = ({ venue }: BookingSummaryProps) => {
             {basePrice}
           </span>
         </div>
+        {addOnsTotal > 0 && (
+          <div className="flex justify-between items-center py-2 border-b border-gray-700">
+            <span className="text-gray-300">Add-ons</span>
+            <span className="text-white font-medium flex items-center">
+              <IndianRupee className="h-4 w-4" />
+              {addOnsTotal}
+            </span>
+          </div>
+        )}
         <div className="flex justify-between items-center py-2 border-b border-gray-700">
           <span className="text-gray-300">Decoration</span>
           <span className="text-white font-medium flex items-center">
             <IndianRupee className="h-4 w-4" />
-            {decorationFee}
+            {totalDecorationFee}
           </span>
         </div>
         <div className="flex justify-between items-center py-2 border-b border-gray-700">

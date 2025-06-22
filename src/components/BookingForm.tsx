@@ -13,9 +13,10 @@ interface BookingFormProps {
   onSubmit: (formData: any) => void;
   loading: boolean;
   error: string | null;
+  onDecorationChange?: (hasDecoration: boolean) => void;
 }
 
-const BookingForm = ({ venue, venueId, onSubmit, loading, error }: BookingFormProps) => {
+const BookingForm = ({ venue, venueId, onSubmit, loading, error, onDecorationChange }: BookingFormProps) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [slots, setSlots] = useState<Slot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -86,6 +87,12 @@ const BookingForm = ({ venue, venueId, onSubmit, loading, error }: BookingFormPr
 
     fetchSlots();
   }, [selectedDate, venueId]);
+
+  useEffect(() => {
+    if (onDecorationChange) {
+      onDecorationChange(formData.decoration);
+    }
+  }, [formData.decoration, onDecorationChange]);
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':');

@@ -62,7 +62,7 @@ const Header = () => {
                 alt="BINGE'N CELEBRATIONS Logo"
                 className="h-10 md:h-12 w-10 md:w-12"
               />
-              <span className="hidden sm:inline text-white font-bold text-lg md:text-xl">
+              <span className="text-white font-bold text-lg md:text-xl">
                 Binge'N Celebrations
               </span>
             </Link>

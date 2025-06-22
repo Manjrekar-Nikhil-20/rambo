@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import BookingForm from './BookingForm';
 import BookingSummary from './BookingSummary';
+import { addOns } from '../data/addOnsData';
 
 declare global {
   interface Window {
@@ -17,6 +18,8 @@ const PaymentPage = () => {
   const [venue, setVenue] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAddOns, setSelectedAddOns] = useState<any[]>([]);
+  const [decorationFee, setDecorationFee] = useState(0);
 
   useEffect(() => {
     const initVenue = async () => {
@@ -80,7 +83,8 @@ const PaymentPage = () => {
       if (bookingError) throw bookingError;
 
       const basePrice = venue.price;
-      const decorationFee = formData.decoration ? venue.decoration_fee : 0;
+      const addOnsTotal = selectedAddOns.reduce((total, addon) => total + addon.price, 0);
+      const totalDecorationFee = formData.decoration ? decorationFee : 0;
       const advanceAmount = 700;
 
       const options = {
@@ -123,6 +127,21 @@ const PaymentPage = () => {
     }
   };
 
+  const handleAddOnToggle = (addon: any) => {
+    setSelectedAddOns(prev => {
+      const exists = prev.find(item => item.id === addon.id);
+      if (exists) {
+        return prev.filter(item => item.id !== addon.id);
+      } else {
+        return [...prev, addon];
+      }
+    });
+  };
+
+  const handleDecorationChange = (hasDecoration: boolean) => {
+    setDecorationFee(hasDecoration ? venue?.decoration_fee || 0 : 0);
+  };
+
   if (!venue) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -149,18 +168,49 @@ const PaymentPage = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
               <BookingForm
                 venue={venue}
                 venueId={venueId}
                 onSubmit={handleFormSubmit}
                 loading={loading}
                 error={error}
+                onDecorationChange={handleDecorationChange}
               />
+              
+              {/* Add-ons Selection */}
+              <div className="bg-gray-800 rounded-xl p-4 md:p-6">
+                <h2 className="text-xl font-bold text-white mb-6">Add-ons (Optional)</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {addOns.slice(0, 12).map((addon) => (
+                    <div
+                      key={addon.id}
+                      className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                        selectedAddOns.find(item => item.id === addon.id)
+                          ? 'border-pink-500 bg-pink-500/10'
+                          : 'border-gray-600 hover:border-gray-500'
+                      }`}
+                      onClick={() => handleAddOnToggle(addon)}
+                    >
+                      <img
+                        src={addon.image}
+                        alt={addon.name}
+                        className="w-full h-20 object-cover rounded mb-2"
+                      />
+                      <h3 className="text-white text-sm font-medium">{addon.name}</h3>
+                      <p className="text-pink-500 text-sm font-bold">₹{addon.price}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="lg:col-span-1">
-              <BookingSummary venue={venue} />
+              <BookingSummary 
+                venue={venue} 
+                selectedAddOns={selectedAddOns}
+                decorationFee={decorationFee}
+              />
             </div>
           </div>
         </div>
