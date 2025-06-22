@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BookingForm from './BookingForm';
 import BookingSummary from './BookingSummary';
-import { addOns } from '../data/addOnsData';
 
 declare global {
   interface Window {
@@ -18,7 +18,6 @@ const PaymentPage = () => {
   const [venue, setVenue] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedAddOns, setSelectedAddOns] = useState<any[]>([]);
   const [decorationFee, setDecorationFee] = useState(0);
 
   useEffect(() => {
@@ -83,7 +82,6 @@ const PaymentPage = () => {
       if (bookingError) throw bookingError;
 
       const basePrice = venue.price;
-      const addOnsTotal = selectedAddOns.reduce((total, addon) => total + addon.price, 0);
       const totalDecorationFee = formData.decoration ? decorationFee : 0;
       const advanceAmount = 700;
 
@@ -127,17 +125,6 @@ const PaymentPage = () => {
     }
   };
 
-  const handleAddOnToggle = (addon: any) => {
-    setSelectedAddOns(prev => {
-      const exists = prev.find(item => item.id === addon.id);
-      if (exists) {
-        return prev.filter(item => item.id !== addon.id);
-      } else {
-        return [...prev, addon];
-      }
-    });
-  };
-
   const handleDecorationChange = (hasDecoration: boolean) => {
     setDecorationFee(hasDecoration ? venue?.decoration_fee || 0 : 0);
   };
@@ -157,6 +144,17 @@ const PaymentPage = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-6 md:mb-8">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"
+              aria-label="Go back to homepage"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span className="text-sm">Back</span>
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
             <img
               src="/BINGEN.png"
               alt="Binge'N Celebration Logo"
@@ -168,7 +166,7 @@ const PaymentPage = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2">
               <BookingForm
                 venue={venue}
                 venueId={venueId}
@@ -177,38 +175,11 @@ const PaymentPage = () => {
                 error={error}
                 onDecorationChange={handleDecorationChange}
               />
-              
-              {/* Add-ons Selection */}
-              <div className="bg-gray-800 rounded-xl p-4 md:p-6">
-                <h2 className="text-xl font-bold text-white mb-6">Add-ons (Optional)</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {addOns.slice(0, 12).map((addon) => (
-                    <div
-                      key={addon.id}
-                      className={`border rounded-lg p-3 cursor-pointer transition-all ${
-                        selectedAddOns.find(item => item.id === addon.id)
-                          ? 'border-pink-500 bg-pink-500/10'
-                          : 'border-gray-600 hover:border-gray-500'
-                      }`}
-                      onClick={() => handleAddOnToggle(addon)}
-                    >
-                      <img
-                        src={addon.image}
-                        alt={addon.name}
-                        className="w-full h-20 object-cover rounded mb-2"
-                      />
-                      <h3 className="text-white text-sm font-medium">{addon.name}</h3>
-                      <p className="text-pink-500 text-sm font-bold">₹{addon.price}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <div className="lg:col-span-1">
               <BookingSummary 
                 venue={venue} 
-                selectedAddOns={selectedAddOns}
                 decorationFee={decorationFee}
               />
             </div>
